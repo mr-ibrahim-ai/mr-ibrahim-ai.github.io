@@ -7,7 +7,6 @@ const ASSETS_TO_CACHE = [
   '/icon-512.png'
 ];
 
-// تثبيت عامل الخدمة وتخزين الملفات الأساسية مؤقتاً
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +15,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// تفعيل عامل الخدمة وحذف الكاش القديم إن وجد
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -31,7 +29,6 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// استدعاء الملفات المخبأة عند طلبها لتسريع التصفح والعمل دون إنترنت
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
