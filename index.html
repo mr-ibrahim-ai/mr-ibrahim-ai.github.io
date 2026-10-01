@@ -1,99 +1,86 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة أكاديمية البيان التعليمية</title>
-  
-  <!-- ربط ملف المانيفست بالمسار الرئيسي المطلق للـ Root -->
-  <link rel="manifest" href="/manifest.json">
-  
-  <!-- تحديث لون شريط المتصفح علوياً ليتوافق مع لون الأيقونة الكحلي الجديد -->
-  <meta name="theme-color" content="#0d1b2a">
+    <meta charset="UTF-8">
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px 20px;
-      background-color: #f9f9f9;
-    }
-    h1 {
-      color: #333;
-    }
-    /* تنسيق زر التثبيت النظيف */
-    #installBtn {
-      display: none; /* مخفي افتراضياً ويظهر برمجياً فقط عندما يدعم الهاتف التثبيت */
-      background-color: #0d1b2a; /* تم تغيير اللون هنا للكحلي ليتماشى مع الهوية الجديدة */
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      border-radius: 25px;
-      cursor: pointer;
-      margin-top: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    #installBtn:hover {
-      background-color: #1b263b;
-    }
-  </style>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,
+                   maximum-scale=1.0, user-scalable=no">
+
+    <meta name="theme-color" content="#0b1220">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="أكاديمية البيان">
+
+    <meta name="description"
+          content="منصة أكاديمية البيان التعليمية">
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="file_000000004b1c822f832d57514330ad17.png">
+
+    <link rel="apple-touch-icon"
+          href="file_000000004b1c822f832d57514330ad17.png">
+
+    <title>أكاديمية البيان</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            font-family: Arial, Tahoma, sans-serif;
+            background: #0b1220;
+            color: white;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        button {
+            font-family: inherit;
+        }
+    </style>
 </head>
+
 <body>
 
-  <h1>مرحباً بك في تطبيقي!</h1>
-  <p>منصة أكاديمية البيان التعليمية</p>
+<div id="app">
+    <!-- محتوى موقعك الحالي هنا -->
+</div>
 
-  <!-- زر التثبيت النظيف للتطبيق -->
-  <button id="installBtn">ثبّت التطبيق الآن</button>
-
-  <script>
-    // 1. تسجيل السيرفيس وركر (Service Worker) بالمسار الرئيسي المطلق
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('تم تسجيل Service Worker بنجاح في النطاق الرئيسي!', reg))
-          .catch(err => console.log('فشل تسجيل Service Worker:', err));
-      });
-    }
-
-    // 2. كود التقاط حدث التثبيت الرسمي (WebAPK) لمنع ظهور شارة كروم وإدخاله لدرج التطبيقات
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // منع المتصفح من إظهار نافذة أندرويد المصغرة التلقائية (الاختصار الضعيف)
-      e.preventDefault();
-      // حفظ الحدث لاستدعائه عند ضغط الزر
-      deferredPrompt = e;
-      // إظهار زر التثبيت الخاص بنا للمستخدم
-      installBtn.style.display = 'inline-block';
-    });
-
-    installBtn.addEventListener('click', () => {
-      if (deferredPrompt) {
-        // إظهار نافذة التثبيت الرسمية النظيفة لمتصفح كروم
-        deferredPrompt.prompt();
-        
-        // معرفة خيار المستخدم (تثبيت أم إلغاء)
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('وافق المستخدم على التثبيت النظيف للموقع كـ WebAPK');
-          } else {
-            console.log('رفض المستخدم التثبيت');
-          }
-          deferredPrompt = null;
-          // إخفاء الزر بعد اتخاذ القرار
-          installBtn.style.display = 'none';
+<script>
+    // تسجيل Service Worker
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker
+                .register("service-worker.js")
+                .then(function (registration) {
+                    console.log("Service Worker registered:", registration.scope);
+                })
+                .catch(function (error) {
+                    console.error("Service Worker registration failed:", error);
+                });
         });
-      }
-    });
+    }
+</script>
 
-    // إخفاء الزر تلقائياً بمجرد إتمام التثبيت بنجاح
-    window.addEventListener('appinstalled', () => {
-      console.log('تم تثبيت التطبيق بنجاح واختفاء زر التثبيت');
-      installBtn.style.display = 'none';
-    });
-  </script>
 </body>
 </html>
