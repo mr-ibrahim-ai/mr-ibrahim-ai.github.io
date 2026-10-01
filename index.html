@@ -159,16 +159,7 @@
                 📲 تثبيت التطبيق
             </button>
 
-            <div id="installInfo" class="install-info">
-                لتثبيت أكاديمية البيان على جهازك:
-                <br>
-                اضغط على زر المشاركة
-                <span class="share-icon">↗️</span>
-                في متصفح Safari
-                <br>
-                ثم اختر
-                <strong>إضافة إلى الشاشة الرئيسية</strong>
-            </div>
+            <div id="installInfo" class="install-info"></div>
 
             <div id="alreadyInstalled" class="already-installed">
                 ✓ التطبيق مثبت بالفعل على جهازك
@@ -178,7 +169,6 @@
 </div>
 
 <script>
-    // تسجيل Service Worker
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
             navigator.serviceWorker
@@ -193,7 +183,6 @@
     }
 
     let deferredPrompt = null;
-
     const installButton = document.getElementById("installButton");
     const installInfo = document.getElementById("installInfo");
     const alreadyInstalled = document.getElementById("alreadyInstalled");
@@ -207,33 +196,46 @@
         return /iphone|ipad|ipod/i.test(navigator.userAgent);
     }
 
-    if (isStandalone()) {
+    function showInstalled() {
         installButton.style.display = "none";
+        installInfo.style.display = "none";
         alreadyInstalled.style.display = "block";
+    }
+
+    function showInstallButton() {
+        installButton.style.display = "block";
+        alreadyInstalled.style.display = "none";
+    }
+
+    if (isStandalone()) {
+        showInstalled();
+    } else {
+        showInstallButton();
     }
 
     window.addEventListener("beforeinstallprompt", function (event) {
         event.preventDefault();
         deferredPrompt = event;
-        installButton.style.display = "block";
-        installInfo.style.display = "none";
+        showInstallButton();
     });
 
     installButton.addEventListener("click", async function () {
-
         if (isStandalone()) {
-            installButton.style.display = "none";
-            alreadyInstalled.style.display = "block";
+            showInstalled();
             return;
         }
 
         if (deferredPrompt) {
             deferredPrompt.prompt();
 
-            const result = await deferredPrompt.userChoice;
+            try {
+                const result = await deferredPrompt.userChoice;
 
-            if (result.outcome === "accepted") {
-                installButton.style.display = "none";
+                if (result.outcome === "accepted") {
+                    installButton.style.display = "none";
+                }
+            } catch (error) {
+                console.error(error);
             }
 
             deferredPrompt = null;
@@ -242,20 +244,23 @@
 
         if (isIOS()) {
             installInfo.style.display = "block";
+            installInfo.innerHTML =
+                "لتثبيت أكاديمية البيان على جهازك:<br>" +
+                "اضغط على زر المشاركة <span class=\"share-icon\">↗️</span> " +
+                "في Safari ثم اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.";
             return;
         }
 
         installInfo.style.display = "block";
         installInfo.innerHTML =
-            "إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر " +
-            "<strong>تثبيت التطبيق</strong> أو <strong>إضافة إلى الشاشة الرئيسية</strong>.";
+            "التثبيت المباشر غير متاح حاليًا في هذا المتصفح.<br>" +
+            "افتح قائمة المتصفح وابحث عن <strong>تثبيت التطبيق</strong> أو " +
+            "<strong>إضافة إلى الشاشة الرئيسية</strong>.";
     });
 
     window.addEventListener("appinstalled", function () {
         deferredPrompt = null;
-        installButton.style.display = "none";
-        installInfo.style.display = "none";
-        alreadyInstalled.style.display = "block";
+        showInstalled();
     });
 </script>
 
