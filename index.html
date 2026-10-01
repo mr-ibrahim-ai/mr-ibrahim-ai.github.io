@@ -57,14 +57,124 @@
         button {
             font-family: inherit;
         }
+
+        .welcome {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 430px;
+            background: #111a2b;
+            border: 1px solid #26344d;
+            border-radius: 24px;
+            padding: 30px 22px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,.3);
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            border-radius: 22px;
+            margin-bottom: 18px;
+        }
+
+        .title {
+            margin: 0 0 10px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .description {
+            margin: 0 0 25px;
+            color: #b8c2d3;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .install-btn {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 15px 18px;
+            background: #2563eb;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .install-btn:active {
+            transform: scale(.98);
+        }
+
+        .install-info {
+            display: none;
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 14px;
+            background: #182338;
+            color: #d5dbea;
+            line-height: 1.9;
+            font-size: 14px;
+        }
+
+        .share-icon {
+            display: inline-block;
+            font-size: 22px;
+            margin: 0 3px;
+        }
+
+        .already-installed {
+            display: none;
+            color: #86efac;
+            font-size: 14px;
+            margin-top: 15px;
+        }
     </style>
 </head>
 
 <body>
-<div> شكرا </div>
 
 <div id="app">
-    <!-- محتوى موقعك الحالي هنا -->
+    <div class="welcome">
+        <div class="card">
+            <img class="logo"
+                 src="file_000000004b1c822f832d57514330ad17.png"
+                 alt="أكاديمية البيان">
+
+            <h1 class="title">أكاديمية البيان</h1>
+
+            <p class="description">
+                مرحبًا بك في منصة أكاديمية البيان التعليمية
+            </p>
+
+            <button id="installButton" class="install-btn">
+                📲 تثبيت التطبيق
+            </button>
+
+            <div id="installInfo" class="install-info">
+                لتثبيت أكاديمية البيان على جهازك:
+                <br>
+                اضغط على زر المشاركة
+                <span class="share-icon">↗️</span>
+                في متصفح Safari
+                <br>
+                ثم اختر
+                <strong>إضافة إلى الشاشة الرئيسية</strong>
+            </div>
+
+            <div id="alreadyInstalled" class="already-installed">
+                ✓ التطبيق مثبت بالفعل على جهازك
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -81,6 +191,72 @@
                 });
         });
     }
+
+    let deferredPrompt = null;
+
+    const installButton = document.getElementById("installButton");
+    const installInfo = document.getElementById("installInfo");
+    const alreadyInstalled = document.getElementById("alreadyInstalled");
+
+    function isStandalone() {
+        return window.matchMedia("(display-mode: standalone)").matches ||
+               window.navigator.standalone === true;
+    }
+
+    function isIOS() {
+        return /iphone|ipad|ipod/i.test(navigator.userAgent);
+    }
+
+    if (isStandalone()) {
+        installButton.style.display = "none";
+        alreadyInstalled.style.display = "block";
+    }
+
+    window.addEventListener("beforeinstallprompt", function (event) {
+        event.preventDefault();
+        deferredPrompt = event;
+        installButton.style.display = "block";
+        installInfo.style.display = "none";
+    });
+
+    installButton.addEventListener("click", async function () {
+
+        if (isStandalone()) {
+            installButton.style.display = "none";
+            alreadyInstalled.style.display = "block";
+            return;
+        }
+
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+
+            const result = await deferredPrompt.userChoice;
+
+            if (result.outcome === "accepted") {
+                installButton.style.display = "none";
+            }
+
+            deferredPrompt = null;
+            return;
+        }
+
+        if (isIOS()) {
+            installInfo.style.display = "block";
+            return;
+        }
+
+        installInfo.style.display = "block";
+        installInfo.innerHTML =
+            "إذا لم تظهر نافذة التثبيت، افتح قائمة المتصفح ثم اختر " +
+            "<strong>تثبيت التطبيق</strong> أو <strong>إضافة إلى الشاشة الرئيسية</strong>.";
+    });
+
+    window.addEventListener("appinstalled", function () {
+        deferredPrompt = null;
+        installButton.style.display = "none";
+        installInfo.style.display = "none";
+        alreadyInstalled.style.display = "block";
+    });
 </script>
 
 </body>
