@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة مواعيد الطلاب</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6fb;color:#172033;font-family:Tahoma,Arial,sans-serif}
+.container{width:min(900px,94%);margin:22px auto 35px}
+.header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border-radius:26px;padding:30px 25px;margin-bottom:18px;box-shadow:0 14px 35px #315ee52b}
+.header h1{margin:0 0 9px;font-size:25px}
+.header p{margin:0;font-size:14px;opacity:.88}
+.card{background:#fff;border:1px solid #e7ebf2;border-radius:24px;padding:21px;margin-bottom:18px;box-shadow:0 8px 25px #1720330b}
+.label{display:block;font-size:14px;font-weight:700;margin-bottom:10px}
+.select{width:100%;height:52px;border:1px solid #dce2eb;background:#fff;border-radius:15px;padding:0 15px;font-size:15px;color:#172033;outline:0}
+.select:focus{border-color:#2563eb;box-shadow:0 0 0 4px #2563eb12}
+.hidden{display:none!important}
+.loading{text-align:center;padding:30px;color:#7b8494}
+.empty{text-align:center;padding:25px;color:#8b95a5;font-size:14px}
+.subscription{border:1px solid #e4e9f1;border-radius:20px;overflow:hidden;margin-top:12px;background:#fff}
+.subHead{padding:17px;background:#f8faff;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+.teacher{font-size:16px;font-weight:700}
+.subject{font-size:12px;color:#727d8d;margin-top:6px}
+.badge{background:#eef2ff;color:#4338ca;border-radius:20px;padding:7px 11px;font-size:11px;white-space:nowrap}
+.scheduleBox{padding:17px}
+.scheduleTitle{font-size:13px;font-weight:700;margin-bottom:12px;color:#4b5565}
+.scheduleList{display:flex;flex-direction:column;gap:9px}
+.scheduleRow{display:grid;grid-template-columns:1fr 145px 43px;gap:8px;align-items:center;background:#f8fafc;border:1px solid #e5eaf1;border-radius:15px;padding:8px}
+.scheduleDay{height:43px;border:1px solid #dce2eb;background:#fff;border-radius:11px;padding:0 10px;font-size:13px;outline:0;color:#172033}
+.scheduleTime{height:43px;border:1px solid #dce2eb;background:#fff;border-radius:11px;padding:0 10px;font-size:14px;direction:ltr;text-align:center;outline:0;font-family:Arial,sans-serif;font-weight:600}
+.scheduleDay:focus,.scheduleTime:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb10}
+.deleteBtn{height:43px;border:0;border-radius:11px;background:#fff0f0;color:#dc2626;font-size:18px;cursor:pointer}
+.deleteBtn:hover{background:#fee2e2}
+.addBtn{width:100%;height:46px;border:0;border-radius:13px;background:#ecfdf3;color:#15803d;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px}
+.addBtn:hover{background:#dcfce7}
+.sendBtn{width:100%;height:52px;border:0;border-radius:14px;background:#2563eb;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;transition:.2s}
+.sendBtn:hover{background:#1d4ed8}
+.sendBtn:disabled{background:#94a3b8;color:#e2e8f0;cursor:not-allowed}
+.modal{position:fixed;inset:0;background:#0f172a99;display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modalBox{width:min(450px,100%);background:#fff;border-radius:24px;padding:22px;box-shadow:0 25px 70px #0003}
+.modalTitle{font-size:18px;font-weight:700;margin-bottom:18px}
+.modalGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modalActions{display:flex;gap:9px;margin-top:16px}
+.modalBtn{height:46px;border:0;border-radius:12px;font-weight:700;cursor:pointer;flex:1}
+.cancelBtn{background:#f1f5f9;color:#334155}
+.confirmBtn{background:#2563eb;color:#fff}
+.toast{position:fixed;bottom:22px;right:50%;transform:translateX(50%);background:#172033;color:#fff;border-radius:13px;padding:13px 20px;font-size:13px;z-index:30;box-shadow:0 10px 30px #0003}
+.toast.success{background:#15803d}
+.toast.error{background:#dc2626}
+@media(max-width:600px){
+.container{width:94%;margin:15px auto 25px}
+.header{padding:25px 19px;border-radius:22px}
+.header h1{font-size:22px}
+.card{padding:17px;border-radius:21px}
+.scheduleRow{grid-template-columns:1fr 120px 40px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>إدارة مواعيد الطلاب</h1>
+<p>اختر الطالب ثم اختر الاشتراك لإدارة المواعيد</p>
+</div>
+<div class="card">
+<label class="label">الطالب</label>
+<select id="studentSelect" class="select">
+<option value="">جاري تحميل الطلاب...</option>
+</select>
+</div>
+<div id="subscriptionsCard" class="card hidden">
+<label class="label">اشتراكات الطالب</label>
+<div id="subscriptions"></div>
+</div>
+</div>
+<div id="modal" class="modal hidden">
+<div class="modalBox">
+<div class="modalTitle">إضافة موعد جديد</div>
+<div class="modalGrid">
+<div>
+<label class="label">اليوم</label>
+<select id="newDay" class="select">
+<option>السبت</option>
+<option>الأحد</option>
+<option>الإثنين</option>
+<option>الثلاثاء</option>
+<option>الأربعاء</option>
+<option>الخميس</option>
+<option>الجمعة</option>
+</select>
+</div>
+<div>
+<label class="label">الوقت</label>
+<input id="newTime" class="scheduleTime" type="text" inputmode="text" placeholder="03/00am">
+</div>
+</div>
+<div class="modalActions">
+<button class="modalBtn cancelBtn" onclick="closeModal()">إلغاء</button>
+<button class="modalBtn confirmBtn" onclick="confirmAdd()">إضافة الموعد</button>
+</div>
+</div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycby3yL71-bfUkxvhi7utbSeReSEcqxEaWL-OjGUuDqSpLDZ2d770iIevbmuy9iOWWD2X/exec';
+let students=[],selectedStudent=null,subscriptions=[],activeSubscription=null,locked=false;
+const studentSelect=document.getElementById('studentSelect'),subscriptionsCard=document.getElementById('subscriptionsCard'),subscriptionsBox=document.getElementById('subscriptions'),modal=document.getElementById('modal'),newDay=document.getElementById('newDay'),newTime=document.getElementById('newTime');
+document.addEventListener('DOMContentLoaded',loadStudents);
+async function api(data){const response=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});return await response.json()}
+async function loadStudents(){try{const result=await api({action:'getStudents'});if(!result.success)throw Error(result.error);students=result.students||[];studentSelect.innerHTML='<option value="">اختر الطالب</option>'+students.map((s,i)=>`<option value="${i}">${escapeHtml(s.name)} (${escapeHtml(s.code)})</option>`).join('')}catch(error){studentSelect.innerHTML='<option value="">تعذر تحميل الطلاب</option>';showToast(error.message,'error')}}
+studentSelect.addEventListener('change',async()=>{const index=studentSelect.value;if(index===''){selectedStudent=null;subscriptions=[];subscriptionsCard.classList.add('hidden');return}selectedStudent=students[Number(index)];subscriptionsCard.classList.remove('hidden');subscriptionsBox.innerHTML='<div class="loading">جاري تحميل الاشتراكات...</div>';try{const result=await api({action:'getSubscriptions',row:selectedStudent.row});if(!result.success)throw Error(result.error);subscriptions=result.subscriptions||[];renderSubscriptions()}catch(error){subscriptionsBox.innerHTML='<div class="empty">تعذر تحميل الاشتراكات</div>';showToast(error.message,'error')}})
+function renderSubscriptions(){if(!subscriptions.length){subscriptionsBox.innerHTML='<div class="empty">لا توجد اشتراكات لهذا الطالب</div>';return}subscriptionsBox.innerHTML=subscriptions.map((s,index)=>`<div class="subscription"><div class="subHead" onclick="openSubscription(${index})"><div><div class="teacher">${escapeHtml(s.teacherName)}</div><div class="subject">${escapeHtml(s.subject)} • كود ${escapeHtml(s.teacherCode)}</div></div><span class="badge">اشتراك ${s.number}</span></div><div class="scheduleBox hidden" id="box${index}"><div class="scheduleTitle">المواعيد</div><div class="scheduleList" id="list${index}">${renderScheduleRows(s.schedule,index)}</div><button class="addBtn" onclick="openModal(${index})">＋ إضافة موعد</button><button class="sendBtn" id="send${index}" onclick="sendSchedules(${index})">إرسال المواعيد</button></div></div>`).join('')}
+function openSubscription(index){if(locked)return;document.querySelectorAll('.scheduleBox').forEach(element=>element.classList.add('hidden'));document.getElementById('box'+index).classList.remove('hidden');activeSubscription=index}
+function parseSchedules(value){const matches=String(value||'').match(/\(([^()]*)\)/g)||[];return matches.map(item=>{const text=item.slice(1,-1).trim(),parts=text.split('_');return{day:(parts[0]||'').trim(),time:normalizeTime((parts.slice(1).join('_')||'').trim())}}).filter(item=>item.day||item.time)}
+function normalizeTime(value){return String(value||'').trim().replace(':','/').replace(/\s+/g,'')}
+function renderScheduleRows(value,index){const schedules=parseSchedules(value);if(!schedules.length)return'<div class="empty">لا توجد مواعيد</div>';return schedules.map((item,i)=>`<div class="scheduleRow"><select class="scheduleDay" data-index="${i}" onchange="changeDay(${index},${i},this.value)">${daysOptions(item.day)}</select><input class="scheduleTime" data-index="${i}" value="${escapeHtml(item.time)}" placeholder="03/00am" oninput="changeTime(${index},${i},this.value)" maxlength="7"><button class="deleteBtn" onclick="deleteSchedule(event,${index},${i})">×</button></div>`).join('')}
+function daysOptions(selected){const days=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];return days.map(day=>`<option value="${day}" ${day===selected?'selected':''}>${day}</option>`).join('')}
+function changeDay(subscriptionIndex,scheduleIndex,value){const schedules=parseSchedules(subscriptions[subscriptionIndex].schedule);if(!schedules[scheduleIndex])return;schedules[scheduleIndex].day=value;subscriptions[subscriptionIndex].schedule=buildSchedule(schedules)}
+function changeTime(subscriptionIndex,scheduleIndex,value){const schedules=parseSchedules(subscriptions[subscriptionIndex].schedule);if(!schedules[scheduleIndex])return;schedules[scheduleIndex].time=normalizeTime(value);subscriptions[subscriptionIndex].schedule=buildSchedule(schedules)}
+function buildSchedule(schedules){return schedules.filter(item=>item.day||item.time).map(item=>`(${item.day} _${item.time})`).join('  ')}
+function deleteSchedule(event,subscriptionIndex,scheduleIndex){event.stopPropagation();const schedules=parseSchedules(subscriptions[subscriptionIndex].schedule);schedules.splice(scheduleIndex,1);subscriptions[subscriptionIndex].schedule=buildSchedule(schedules);document.getElementById('list'+subscriptionIndex).innerHTML=renderScheduleRows(subscriptions[subscriptionIndex].schedule,subscriptionIndex)}
+function openModal(index){if(locked)return;activeSubscription=index;newDay.value='السبت';newTime.value='';modal.classList.remove('hidden');setTimeout(()=>newTime.focus(),100)}
+function closeModal(){modal.classList.add('hidden')}
+function confirmAdd(){let time=normalizeTime(newTime.value);if(!/^\d{1,2}\/\d{2}(am|pm)$/i.test(time)){showToast('اكتب الوقت بالشكل 03/00am','error');return}const schedules=parseSchedules(subscriptions[activeSubscription].schedule);schedules.push({day:newDay.value,time});subscriptions[activeSubscription].schedule=buildSchedule(schedules);document.getElementById('list'+activeSubscription).innerHTML=renderScheduleRows(subscriptions[activeSubscription].schedule,activeSubscription);closeModal()}
+async function sendSchedules(index){if(locked)return;const subscription=subscriptions[index],schedules=parseSchedules(subscription.schedule).filter(item=>item.day&&item.time),button=document.getElementById('send'+index);button.disabled=true;button.textContent='جاري الحفظ...';try{const result=await api({action:'updateSubscriptionSchedule',studentName:selectedStudent.name,studentCode:selectedStudent.code,teacherName:subscription.teacherName,teacherCode:subscription.teacherCode,subject:subscription.subject,schedules:schedules.map(item=>`${item.day} _${normalizeTime(item.time)}`)});if(!result.success)throw Error(result.error);locked=true;document.querySelectorAll('button,select,input').forEach(element=>element.disabled=true);button.textContent='تم إرسال المواعيد';showToast('تم حفظ المواعيد بنجاح','success')}catch(error){button.disabled=false;button.textContent='إرسال المواعيد';showToast(error.message,'error')}}
+function showToast(message,type){const toast=document.getElementById('toast');toast.textContent=message;toast.className='toast '+type;clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>toast.classList.add('hidden'),3000)}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[character]))}
+</script>
+</body>
+</html>
