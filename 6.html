@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تعديل بيانات الطلاب والمعلمين</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb;color:#172033;font-family:Tahoma,Arial,sans-serif}
+.container{width:min(850px,94%);margin:25px auto}
+.header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;padding:28px 23px;border-radius:25px;margin-bottom:18px}
+.header h1{margin:0 0 8px;font-size:23px}.header p{margin:0;font-size:13px;opacity:.86}
+.card{background:#fff;border:1px solid #e5eaf1;border-radius:22px;padding:21px;margin-bottom:18px;box-shadow:0 8px 25px #1720330a}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+select,input{width:100%;height:48px;border:1px solid #d9e0e9;border-radius:13px;padding:0 13px;background:#fff;font-size:14px;outline:0}
+select:focus,input:focus{border-color:#2563eb}
+input:disabled{background:#f3f5f8;color:#667085}
+.mode{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mode button{height:52px;border:1px solid #dce3ed;background:#fff;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer}
+.mode button.active{background:#2563eb;color:#fff;border-color:#2563eb}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{margin-top:12px}
+.btn{width:100%;height:49px;border:0;border-radius:13px;font-weight:700;cursor:pointer;margin-top:12px}
+.save{background:#2563eb;color:#fff}.danger{background:#fee2e2;color:#dc2626}.btn:disabled{background:#94a3b8;color:#e2e8f0;cursor:not-allowed}
+.loading,.empty{text-align:center;padding:25px;color:#7b8494}
+.toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);padding:14px 22px;border-radius:13px;color:#fff;z-index:100;font-size:13px}
+.success{background:#15803d}.error{background:#dc2626}
+.confirm{position:fixed;inset:0;background:#0f172a99;display:flex;align-items:center;justify-content:center;padding:18px;z-index:90}
+.confirmBox{width:min(440px,100%);background:#fff;border-radius:24px;padding:25px;box-shadow:0 25px 70px #0003;text-align:center}
+.icon{width:56px;height:56px;border-radius:50%;background:#fff1f2;color:#dc2626;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:25px;font-weight:700}
+.confirmTitle{font-size:19px;font-weight:700;margin-bottom:9px}.confirmText{font-size:13px;color:#667085;line-height:1.9;margin-bottom:20px}
+.actions{display:flex;gap:10px}.confirmBtn{height:46px;border:0;border-radius:12px;font-weight:700;cursor:pointer;flex:1}.cancel{background:#f1f5f9;color:#334155}.delete{background:#dc2626;color:#fff}.delete:disabled{background:#94a3b8}
+@media(max-width:600px){.grid,.mode{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>تعديل بيانات الطلاب والمعلمين</h1>
+<p>اختر القسم ثم اختر الشخص المطلوب لتعديل بياناته أو محوها</p>
+</div>
+<div class="card">
+<div class="mode">
+<button id="studentMode" class="active" onclick="chooseMode('students')">الطلاب</button>
+<button id="teacherMode" onclick="chooseMode('teachers')">المعلمين</button>
+</div>
+</div>
+<div class="card">
+<label id="personLabel">الطالب</label>
+<select id="persons"><option value="">جاري التحميل...</option></select>
+</div>
+<div id="formCard" class="card hidden"></div>
+</div>
+<div id="confirm" class="confirm hidden">
+<div class="confirmBox">
+<div class="icon">!</div>
+<div class="confirmTitle" id="confirmTitle">تأكيد المحو</div>
+<div class="confirmText" id="confirmText"></div>
+<div class="actions">
+<button class="confirmBtn cancel" onclick="closeConfirm()">إلغاء</button>
+<button class="confirmBtn delete" id="confirmDelete" onclick="executeClear()">تأكيد المحو</button>
+</div>
+</div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const URL='https://script.google.com/macros/s/AKfycbxJtGr4PjjLyCUFGht5edzaP30ekc0Et65MMqtrsdBOkWMkjp4Rghpm2N4tAJZ_rtMZ/exec';
+let mode='students',people=[],selected=null,locked=false,clearData=null;
+const persons=document.getElementById('persons'),formCard=document.getElementById('formCard');
+document.addEventListener('DOMContentLoaded',()=>loadPeople());
+async function api(data){const r=await fetch(URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});return r.json()}
+async function chooseMode(m){if(locked)return;mode=m;document.getElementById('studentMode').classList.toggle('active',m==='students');document.getElementById('teacherMode').classList.toggle('active',m==='teachers');document.getElementById('personLabel').textContent=m==='students'?'الطالب':'المعلم';formCard.classList.add('hidden');await loadPeople()}
+async function loadPeople(){persons.innerHTML='<option value="">جاري التحميل...</option>';people=[];try{const r=await api({action:mode==='students'?'getStudents':'getTeachers'});if(!r.success)throw Error(r.error);people=mode==='students'?r.students||[]:r.teachers||[];persons.innerHTML='<option value="">اختر '+(mode==='students'?'الطالب':'المعلم')+'</option>'+people.map((p,i)=>`<option value="${i}">${esc(p.name)} (${esc(p.code)})</option>`).join('')}catch(e){persons.innerHTML='<option value="">تعذر التحميل</option>';show(e.message,'error')}}
+persons.onchange=async()=>{if(persons.value===''){formCard.classList.add('hidden');return}selected=people[Number(persons.value)];formCard.classList.remove('hidden');formCard.innerHTML='<div class="loading">جاري تحميل البيانات...</div>';try{const r=await api({action:mode==='students'?'getStudent':'getTeacher',row:selected.row});if(!r.success)throw Error(r.error);renderForm(mode==='students'?r.student:r.teacher)}catch(e){formCard.innerHTML='<div class="empty">تعذر تحميل البيانات</div>';show(e.message,'error')}}
+function renderForm(p){if(mode==='students')formCard.innerHTML=`<div class="grid"><div><label>اسم الطالب</label><input value="${esc(p.name)}" disabled></div><div><label>كود الطالب</label><input value="${esc(p.code)}" disabled></div></div><div class="full"><label>رقم الواتس</label><input id="whatsapp" value="${esc(p.whatsapp)}"></div><div class="grid full"><div><label>الصف الدراسي</label><input id="grade" value="${esc(p.grade)}"></div><div><label>الدولة</label><input id="country" value="${esc(p.country)}"></div></div><button class="btn save" id="save" onclick="saveStudent()">إرسال التعديلات</button><button class="btn danger" id="clear" onclick="askClear()">محو بيانات الطالب</button>`;else formCard.innerHTML=`<div class="grid"><div><label>اسم المعلم</label><input value="${esc(p.name)}" disabled></div><div><label>كود المعلم</label><input value="${esc(p.code)}" disabled></div></div><div class="full"><label>المادة</label><input value="${esc(p.subject)}" disabled></div><div class="full"><label>رقم الواتس</label><input id="whatsapp" value="${esc(p.whatsapp)}"></div><button class="btn save" id="save" onclick="saveTeacher()">إرسال التعديل</button><button class="btn danger" id="clear" onclick="askClear()">محو بيانات المعلم</button>`}
+async function saveStudent(){if(locked)return;const b=document.getElementById('save');b.disabled=true;b.textContent='جاري الحفظ...';try{const r=await api({action:'updateStudent',row:selected.row,name:selected.name,code:selected.code,whatsapp:document.getElementById('whatsapp').value,grade:document.getElementById('grade').value,country:document.getElementById('country').value});if(!r.success)throw Error(r.error);locked=true;b.textContent='تم الحفظ';document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);show(r.message,'success')}catch(e){b.disabled=false;b.textContent='إرسال التعديلات';show(e.message,'error')}}
+async function saveTeacher(){if(locked)return;const b=document.getElementById('save');b.disabled=true;b.textContent='جاري الحفظ...';try{const r=await api({action:'updateTeacher',row:selected.row,name:selected.name,code:selected.code,whatsapp:document.getElementById('whatsapp').value});if(!r.success)throw Error(r.error);locked=true;b.textContent='تم الحفظ';document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);show(r.message,'success')}catch(e){b.disabled=false;b.textContent='إرسال التعديل';show(e.message,'error')}}
+function askClear(){if(locked||!selected)return;clearData={row:selected.row,name:selected.name,code:selected.code};document.getElementById('confirmTitle').textContent=mode==='students'?'محو بيانات الطالب':'محو بيانات المعلم';document.getElementById('confirmText').innerHTML=mode==='students'?'سيتم محو بيانات هذا الطالب من الصف بالكامل مع الحفاظ على الأعمدة المحمية الخاصة بالاشتراكات.<br><b>لن يتم حذف الصف نفسه.</b><br>لا يمكن التراجع عن العملية.':'سيتم محو جميع بيانات هذا المعلم من الصف.<br><b>لن يتم حذف الصف نفسه.</b><br>لا يمكن التراجع عن العملية.';document.getElementById('confirm').classList.remove('hidden')}
+function closeConfirm(){clearData=null;document.getElementById('confirm').classList.add('hidden');const b=document.getElementById('confirmDelete');b.disabled=false;b.textContent='تأكيد المحو'}
+async function executeClear(){if(locked||!clearData)return;const b=document.getElementById('confirmDelete');b.disabled=true;b.textContent='جاري التحقق والمحو...';try{const r=await api({action:mode==='students'?'clearStudent':'clearTeacher',row:clearData.row,name:clearData.name,code:clearData.code});if(!r.success)throw Error(r.error);locked=true;document.getElementById('confirm').classList.add('hidden');document.querySelectorAll('button,input,select').forEach(x=>x.disabled=true);show(r.message,'success')}catch(e){b.disabled=false;b.textContent='تأكيد المحو';closeConfirm();show(e.message,'error')}}
+function show(t,c){const x=document.getElementById('toast');x.textContent=t;x.className='toast '+c;x.classList.remove('hidden');clearTimeout(window.timer);window.timer=setTimeout(()=>x.classList.add('hidden'),4000)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+</script>
+</body>
+</html>
