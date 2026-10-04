@@ -1,268 +1,157 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0,
-                   maximum-scale=1.0, user-scalable=no">
-
-    <meta name="theme-color" content="#0b1220">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="أكاديمية البيان">
-
-    <meta name="description"
-          content="منصة أكاديمية البيان التعليمية">
-
-    <link rel="manifest" href="manifest.json">
-
-    <link rel="icon"
-          type="image/png"
-          sizes="192x192"
-          href="file_000000004b1c822f832d57514330ad17.png">
-
-    <link rel="apple-touch-icon"
-          href="file_000000004b1c822f832d57514330ad17.png">
-
-    <title>أكاديمية البيان</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100%;
-            font-family: Arial, Tahoma, sans-serif;
-            background: #0b1220;
-            color: white;
-        }
-
-        body {
-            min-height: 100vh;
-        }
-
-        #app {
-            width: 100%;
-            min-height: 100vh;
-        }
-
-        button {
-            font-family: inherit;
-        }
-
-        .welcome {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-        }
-
-        .card {
-            width: 100%;
-            max-width: 430px;
-            background: #111a2b;
-            border: 1px solid #26344d;
-            border-radius: 24px;
-            padding: 30px 22px;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,.3);
-        }
-
-        .logo {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
-            border-radius: 22px;
-            margin-bottom: 18px;
-        }
-
-        .title {
-            margin: 0 0 10px;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .description {
-            margin: 0 0 25px;
-            color: #b8c2d3;
-            line-height: 1.8;
-            font-size: 15px;
-        }
-
-        .install-btn {
-            width: 100%;
-            border: 0;
-            border-radius: 14px;
-            padding: 15px 18px;
-            background: #2563eb;
-            color: white;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .install-btn:active {
-            transform: scale(.98);
-        }
-
-        .install-info {
-            display: none;
-            margin-top: 18px;
-            padding: 16px;
-            border-radius: 14px;
-            background: #182338;
-            color: #d5dbea;
-            line-height: 1.9;
-            font-size: 14px;
-        }
-
-        .share-icon {
-            display: inline-block;
-            font-size: 22px;
-            margin: 0 3px;
-        }
-
-        .already-installed {
-            display: none;
-            color: #86efac;
-            font-size: 14px;
-            margin-top: 15px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="أكاديمية البيان">
+<meta name="description" content="منصة أكاديمية البيان التعليمية">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="file_000000004b1c822f832d57514330ad17.png">
+<link rel="apple-touch-icon" href="file_000000004b1c822f832d57514330ad17.png">
+<title>المنصة التعليمية</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Tahoma,Arial,sans-serif;background:#f7faff;color:#102d57}
+button{font-family:inherit;border:0;cursor:pointer}
+.app{width:100%;max-width:520px;min-height:100vh;margin:auto;background:#f8fbff}
+.header{height:150px;background:linear-gradient(145deg,#172d58,#293e72);position:relative;padding:19px 25px;color:#fff;overflow:hidden}
+.header:after{content:"";position:absolute;bottom:-72px;left:-6%;width:112%;height:110px;background:#f8fbff;border-radius:50% 50% 0 0/55% 55% 0 0}
+.top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2}
+.profile{display:flex;align-items:center;gap:12px}
+.avatar{width:61px;height:61px;border-radius:50%;background:linear-gradient(#d9efff,#b8d9ed);border:2px solid #fff;position:relative;overflow:hidden}
+.avatar:before{content:"";position:absolute;width:25px;height:25px;background:#182d53;border-radius:50%;top:8px;left:16px}
+.avatar:after{content:"";position:absolute;width:43px;height:32px;background:#2471bc;border-radius:28px 28px 0 0;bottom:-3px;left:7px}
+.welcome small{display:block;font-size:13px}
+.welcome strong{display:block;font-size:18px;line-height:1.7}
+.welcome span{font-size:11px;color:#dce7fa}
+.actions{display:flex;gap:18px;align-items:center}
+.bell{width:25px;height:25px;border:3px solid #fff;border-radius:15px 15px 7px 7px;position:relative}
+.bell:after{content:"";position:absolute;width:8px;height:3px;background:#fff;border-radius:5px;bottom:-6px;left:6px}
+.notification{position:absolute;width:8px;height:8px;background:#ff5260;border-radius:50%;top:-5px;right:-4px}
+.menu{width:29px;height:21px;display:flex;flex-direction:column;justify-content:space-between}
+.menu i{height:3px;background:#fff;border-radius:5px}
+.hero{position:relative;margin:0 25px 22px;height:190px;border-radius:22px;overflow:hidden;background:linear-gradient(115deg,#35aaf0,#3478ed 50%,#4131df);box-shadow:0 8px 22px rgba(24,65,120,.13)}
+.hero-content{position:absolute;right:21px;top:21px;width:57%;color:#fff;z-index:3}
+.hero-content h1{font-size:25px;line-height:1.4;margin-bottom:5px}
+.hero-content h2{font-size:16px;font-weight:500;margin-bottom:9px}
+.hero-content p{font-size:11px;line-height:1.8;color:#eaf1ff}
+.start{margin-top:12px;background:#fff;color:#293bd3;border-radius:25px;padding:9px 19px;font-size:13px;font-weight:bold}
+.books{position:absolute;left:6px;bottom:9px;width:47%;height:105px}
+.book{position:absolute;left:0;height:24px;border-radius:4px 7px 7px 4px;box-shadow:0 4px 7px #0004;transform:skew(-7deg)}
+.book:nth-child(1){bottom:0;width:130px;background:#20a58e}
+.book:nth-child(2){bottom:21px;width:148px;background:#f3a11b}
+.book:nth-child(3){bottom:42px;width:130px;background:#2474df}
+.book:nth-child(4){bottom:63px;width:108px;background:#e8eaf0}
+.cap{position:absolute;left:51px;bottom:75px;width:86px;height:29px;background:#132c55;clip-path:polygon(0 55%,50% 0,100% 55%,50% 100%)}
+.cap:after{content:"";position:absolute;width:50px;height:8px;background:#102544;left:18px;bottom:-5px;border-radius:50%}
+.pencils{position:absolute;left:120px;bottom:60px;width:18px;height:48px;background:#152e56;border-radius:4px;transform:rotate(3deg)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;padding:0 25px 22px}
+.card{height:170px;background:#fff;border:1px solid #e4ebf5;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 4px 15px #193a6410;cursor:pointer;transition:.15s}
+.card:active{transform:scale(.97)}
+.card-icon{width:55px;height:55px;border-radius:17px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:25px;margin-bottom:12px}
+.card:nth-child(1) .card-icon{background:#268df1}
+.card:nth-child(2) .card-icon{background:#7542e9}
+.card:nth-child(3) .card-icon{background:#17ad83}
+.card:nth-child(4) .card-icon{background:#f34e62}
+.card:nth-child(5) .card-icon{background:#f5a21c}
+.card:nth-child(6) .card-icon{background:#7040e5}
+.card h3{font-size:15px;margin-bottom:7px}
+.card p{font-size:10px;color:#77869d;line-height:1.5;padding:0 5px}
+.section{margin:0 25px 20px;padding:18px;background:#fff;border:1px solid #e4ebf5;border-radius:20px;box-shadow:0 4px 15px #193a6410}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-title h2{font-size:18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.stat{height:100px;border:1px solid #e7edf5;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.stat-icon{font-size:19px;margin-bottom:6px}
+.stat strong{font-size:17px;margin-bottom:4px}
+.stat span{font-size:9px;color:#718099}
+.activity{display:flex;align-items:center;gap:9px;padding:12px 0;border-bottom:1px solid #edf1f6}
+.activity:last-child{border:0}
+.activity-icon{width:40px;height:40px;flex:none;border-radius:50%;background:#edf4ff;display:flex;align-items:center;justify-content:center}
+.activity-content{flex:1}
+.activity-content strong{display:block;font-size:11px;margin-bottom:4px}
+.activity-content span{font-size:9px;color:#77869b}
+.time{font-size:9px;color:#a1adbd}
+.nav{height:72px;background:#fff;border-top:1px solid #e8edf4;display:grid;grid-template-columns:repeat(5,1fr);position:sticky;bottom:0}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#71819a;font-size:10px;position:relative}
+.nav-item i{font-style:normal;font-size:21px}
+.nav-item.active{color:#1678ea;font-weight:bold}
+.nav-item.active:after{content:"";position:absolute;bottom:6px;width:40px;height:3px;border-radius:5px;background:#1678ea}
+@media(max-width:390px){
+.header{height:150px;padding:19px}
+.hero{margin:0 18px 19px;height:190px}
+.grid{padding:0 18px 20px;gap:9px}
+.card{height:155px}
+.section{margin-left:18px;margin-right:18px}
+}
+</style>
 </head>
-
 <body>
-
-<div id="app">
-    <div class="welcome">
-        <div class="card">
-            <img class="logo"
-                 src="file_000000004b1c822f832d57514330ad17.png"
-                 alt="أكاديمية البيان">
-
-            <h1 class="title">أكاديمية البيان</h1>
-
-            <p class="description">
-                مرحبًا بك في منصة أكاديمية البيان التعليمية
-            </p>
-
-            <button id="installButton" class="install-btn">
-                📲 تثبيت التطبيق
-            </button>
-
-            <div id="installInfo" class="install-info"></div>
-
-            <div id="alreadyInstalled" class="already-installed">
-                ✓ التطبيق مثبت بالفعل على جهازك
-            </div>
-        </div>
-    </div>
+<div class="app">
+<header class="header">
+<div class="top">
+<div class="profile">
+<div class="avatar"></div>
+<div class="welcome"><small>أهلاً بك</small><strong>أ. محمد أحمد</strong><span>مدير المنصة ✓</span></div>
 </div>
-
+<div class="actions"><div class="bell"><span class="notification"></span></div><div class="menu"><i></i><i></i><i></i></div></div>
+</div>
+</header>
+<section class="hero">
+<div class="books"><div class="book"></div><div class="book"></div><div class="book"></div><div class="book"></div><div class="cap"></div><div class="pencils"></div></div>
+<div class="hero-content"><h1>منصتك التعليمية</h1><h2>إدارة سهلة .. نتائج أفضل</h2><p>كل ما تحتاجه لإدارة العملية التعليمية في مكان واحد</p><button class="start">ابدأ الآن ›</button></div>
+</section>
+<section class="grid">
+<div class="card" onclick="go(1)"><div class="card-icon">♙</div><h3>إضافة الطلاب والمعلمين</h3><p>إضافة وإدارة بيانات الطلاب والمعلمين</p></div>
+<div class="card" onclick="go(2)"><div class="card-icon">▤</div><h3>إضافة الاشتراكات</h3><p>إضافة الاشتراكات والخدمات التعليمية</p></div>
+<div class="card" onclick="go(3)"><div class="card-icon">◷</div><h3>إضافة المواعيد</h3><p>إضافة وتنظيم المواعيد الدراسية</p></div>
+<div class="card" onclick="go(4)"><div class="card-icon">▣</div><h3>عرض الصفحات</h3><p>الوصول إلى صفحات المنصة المختلفة</p></div>
+<div class="card" onclick="go(5)"><div class="card-icon">✎</div><h3>تعديل الاشتراكات</h3><p>تعديل وإدارة بيانات الاشتراكات</p></div>
+<div class="card" onclick="go(6)"><div class="card-icon">♧</div><h3>تعديل الطلاب والمعلمين</h3><p>تعديل بيانات الطلاب والمعلمين</p></div>
+</section>
+<section class="section">
+<div class="section-title"><h2>إحصائيات سريعة</h2><span>▥</span></div>
+<div class="stats">
+<div class="stat"><div class="stat-icon">▤</div><strong>36</strong><span>الفواتير المعلقة</span></div>
+<div class="stat"><div class="stat-icon">▣</div><strong>15</strong><span>الاختبارات الحالية</span></div>
+<div class="stat"><div class="stat-icon">🎓</div><strong>248</strong><span>عدد الطلاب</span></div>
+<div class="stat"><div class="stat-icon">♙</div><strong>12</strong><span>عدد المعلمين</span></div>
+</div>
+</section>
+<section class="section">
+<div class="section-title"><h2>آخر النشاطات</h2><span>◷</span></div>
+<div class="activity"><div class="activity-icon">☑</div><div class="activity-content"><strong>تم إضافة اختبار جديد</strong><span>اختبار الشهر الأول - الصف الثالث</span></div><div class="time">منذ 10 دقائق</div></div>
+<div class="activity"><div class="activity-icon">▣</div><div class="activity-content"><strong>تم تحديث نتيجة طالب</strong><span>أحمد محمد - الصف الأول</span></div><div class="time">منذ 25 دقيقة</div></div>
+<div class="activity"><div class="activity-icon">▤</div><div class="activity-content"><strong>تم إصدار فاتورة جديدة</strong><span>فاتورة رقم #1025</span></div><div class="time">منذ ساعة</div></div>
+</section>
+<nav class="nav">
+<div class="nav-item active"><i>⌂</i><span>الرئيسية</span></div>
+<div class="nav-item"><i>♧</i><span>الطلاب</span></div>
+<div class="nav-item"><i>♙</i><span>المعلمين</span></div>
+<div class="nav-item"><i>♧</i><span>الإشعارات</span></div>
+<div class="nav-item"><i>▦</i><span>المزيد</span></div>
+</nav>
+</div>
 <script>
-    if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function () {
-            navigator.serviceWorker
-                .register("service-worker.js")
-                .then(function (registration) {
-                    console.log("Service Worker registered:", registration.scope);
-                })
-                .catch(function (error) {
-                    console.error("Service Worker registration failed:", error);
-                });
-        });
-    }
-
-    let deferredPrompt = null;
-    const installButton = document.getElementById("installButton");
-    const installInfo = document.getElementById("installInfo");
-    const alreadyInstalled = document.getElementById("alreadyInstalled");
-
-    function isStandalone() {
-        return window.matchMedia("(display-mode: standalone)").matches ||
-               window.navigator.standalone === true;
-    }
-
-    function isIOS() {
-        return /iphone|ipad|ipod/i.test(navigator.userAgent);
-    }
-
-    function showInstalled() {
-        installButton.style.display = "none";
-        installInfo.style.display = "none";
-        alreadyInstalled.style.display = "block";
-    }
-
-    function showInstallButton() {
-        installButton.style.display = "block";
-        alreadyInstalled.style.display = "none";
-    }
-
-    if (isStandalone()) {
-        showInstalled();
-    } else {
-        showInstallButton();
-    }
-
-    window.addEventListener("beforeinstallprompt", function (event) {
-        event.preventDefault();
-        deferredPrompt = event;
-        showInstallButton();
-    });
-
-    installButton.addEventListener("click", async function () {
-        if (isStandalone()) {
-            showInstalled();
-            return;
-        }
-
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-
-            try {
-                const result = await deferredPrompt.userChoice;
-
-                if (result.outcome === "accepted") {
-                    installButton.style.display = "none";
-                }
-            } catch (error) {
-                console.error(error);
-            }
-
-            deferredPrompt = null;
-            return;
-        }
-
-        if (isIOS()) {
-            installInfo.style.display = "block";
-            installInfo.innerHTML =
-                "لتثبيت أكاديمية البيان على جهازك:<br>" +
-                "اضغط على زر المشاركة <span class=\"share-icon\">↗️</span> " +
-                "في Safari ثم اختر <strong>إضافة إلى الشاشة الرئيسية</strong>.";
-            return;
-        }
-
-        installInfo.style.display = "block";
-        installInfo.innerHTML =
-            "التثبيت المباشر غير متاح حاليًا في هذا المتصفح.<br>" +
-            "افتح قائمة المتصفح وابحث عن <strong>تثبيت التطبيق</strong> أو " +
-            "<strong>إضافة إلى الشاشة الرئيسية</strong>.";
-    });
-
-    window.addEventListener("appinstalled", function () {
-        deferredPrompt = null;
-        showInstalled();
-    });
+function go(page){window.location.href=page+".html"}
 </script>
-
+  <script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+        navigator.serviceWorker
+            .register("service-worker.js")
+            .then(function (registration) {
+                console.log("Service Worker registered:", registration.scope);
+            })
+            .catch(function (error) {
+                console.error("Service Worker registration failed:", error);
+            });
+    });
+}
+  </scrip>
 </body>
 </html>
