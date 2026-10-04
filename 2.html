@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الاشتراكات</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;font-family:Arial,sans-serif;color:#222}.container{width:min(92%,500px);margin:35px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 4px 18px #0001}h2{text-align:center;margin:0 0 25px}label{display:block;margin:15px 0 7px;font-weight:bold}select,input,button{width:100%;height:48px;border:1px solid #ddd;border-radius:9px;padding:0 13px;font-size:16px;background:#fff}select:focus,input:focus{outline:none;border-color:#777}button{margin-top:22px;background:#222;color:#fff;border:0;cursor:pointer;font-weight:bold}button:disabled{opacity:.6;cursor:not-allowed}#response{margin-top:18px;padding:13px;border-radius:9px;text-align:center;display:none;line-height:1.7}.success{display:block!important;background:#e9f8ee;color:#16733a}.error{display:block!important;background:#fdecec;color:#a51d1d}.loading{display:block!important;background:#f1f1f1;color:#555}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>إضافة اشتراك</h2>
+<label>اختيار المعلم</label>
+<select id="teacher"><option value="">جاري جلب المعلمين...</option></select>
+<label>اختيار الطالب</label>
+<select id="student"><option value="">جاري جلب الطلاب...</option></select>
+<label>إجمالي سعر اشتراك المعلم</label>
+<input id="teacherPrice" type="text" inputmode="decimal" placeholder="أدخل السعر">
+<label>إجمالي سعر اشتراك الطالب</label>
+<input id="studentPrice" type="text" inputmode="decimal" placeholder="أدخل السعر">
+<label>عدد الحصص</label>
+<input id="lessons" type="number" min="1" step="1" placeholder="أدخل عدد الحصص">
+<button id="send" type="button">إرسال</button>
+<div id="response"></div>
+</div>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwxLvndaH0Ti1J5rySTkdg-qzfzmi6EYMyLa6OgvpIf2MvAWI8UpR6A-VnlS-gHHEVQ/exec";
+let teachers=[];
+const teacher=document.getElementById("teacher"),student=document.getElementById("student"),teacherPrice=document.getElementById("teacherPrice"),studentPrice=document.getElementById("studentPrice"),lessons=document.getElementById("lessons"),send=document.getElementById("send"),response=document.getElementById("response");
+function showResponse(message,type){response.className=type;response.textContent=message}
+async function request(data){const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(data)});if(!r.ok)throw new Error("تعذر الاتصال بالخادم");return await r.json()}
+async function loadData(){showResponse("جاري جلب البيانات...","loading");try{const result=await request({action:"getData"});if(!result.ok){showResponse(result.message||"خطأ غير معروف","error");return}teachers=result.teachers||[];teacher.innerHTML='<option value="">اختر المعلم</option>';teachers.forEach((item,i)=>{const option=document.createElement("option");option.value=i;option.textContent=item.name+" - "+item.subject+" - "+item.whatsapp;teacher.appendChild(option)});student.innerHTML='<option value="">اختر الطالب</option>';(result.students||[]).forEach(name=>{const option=document.createElement("option");option.value=name;option.textContent=name;student.appendChild(option)});showResponse(result.message,"success")}catch(e){showResponse("خطأ في الاتصال بالخادم: "+e.message,"error")}}
+async function sendSubscription(){const index=teacher.value,studentName=student.value,tp=teacherPrice.value.trim(),sp=studentPrice.value.trim(),count=lessons.value.trim();if(index===""){showResponse("خطأ: اختر المعلم","error");return}if(!studentName){showResponse("خطأ: اختر الطالب","error");return}if(!tp){showResponse("خطأ: أدخل إجمالي سعر اشتراك المعلم","error");return}if(!sp){showResponse("خطأ: أدخل إجمالي سعر اشتراك الطالب","error");return}if(!count||Number(count)<1||!Number.isInteger(Number(count))){showResponse("خطأ: أدخل عدد حصص صحيح","error");return}const t=teachers[Number(index)];send.disabled=true;showResponse("جاري إضافة الاشتراك...","loading");try{const result=await request({action:"addSubscription",teacherName:t.name,subject:t.subject,whatsapp:t.whatsapp,studentName,teacherPrice:tp,studentPrice:sp,lessons:count});if(!result.ok){showResponse(result.message||"خطأ غير معروف","error");return}showResponse(result.message+" رقم الاشتراك: "+result.subscriptionNumber,"success");teacherPrice.value="";studentPrice.value="";lessons.value=""}catch(e){showResponse("خطأ في الاتصال بالخادم: "+e.message,"error")}finally{send.disabled=false}}
+send.addEventListener("click",sendSubscription);
+window.addEventListener("load",loadData);
+</script>
+</body>
+</html>
