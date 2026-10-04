@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تسجيل الطلاب والمعلمين</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#eef2f7,#f8fafc);font-family:Arial,sans-serif;color:#1f2937;display:flex;align-items:center;justify-content:center;padding:20px}
+.container{width:min(100%,480px);background:#fff;padding:28px;border-radius:22px;box-shadow:0 15px 45px rgba(15,23,42,.1)}
+h1{text-align:center;margin:0 0 25px;font-size:25px;color:#111827}
+.field{margin-bottom:17px}
+label{display:block;margin-bottom:8px;font-size:15px;font-weight:700;color:#374151}
+input,select,button{width:100%;height:48px;border-radius:12px;font-size:16px;font-family:inherit}
+input,select{padding:0 14px;border:1px solid #d8dee8;background:#fff;color:#1f2937;transition:.2s}
+input:focus,select:focus{outline:0;border-color:#4b5563;box-shadow:0 0 0 3px rgba(75,85,99,.1)}
+button{border:0;background:#111827;color:#fff;font-weight:700;cursor:pointer;transition:.2s;margin-top:4px}
+button:hover:not(:disabled){background:#374151}
+button:disabled{opacity:.6;cursor:not-allowed}
+.message{display:none;text-align:center;padding:13px 14px;border-radius:12px;margin-bottom:18px;font-size:15px;font-weight:700}
+.message.show{display:block}
+.success{background:#ecfdf3;color:#16743b;border:1px solid #b7ebc9}
+.error{background:#fef2f2;color:#b42318;border:1px solid #fecaca}
+.loading{display:none;text-align:center;margin-top:12px;color:#6b7280;font-size:14px}
+.optional{font-weight:400;color:#9ca3af;font-size:12px}
+@media(max-width:520px){body{padding:12px}.container{padding:22px 18px;border-radius:18px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>تسجيل الطلاب والمعلمين</h1>
+<div id="message" class="message"></div>
+<div class="field">
+<label for="type">نوع التسجيل</label>
+<select id="type">
+<option value="طالب">طالب</option>
+<option value="معلم">معلم</option>
+</select>
+</div>
+<form id="form">
+<div id="studentFields">
+<div class="field"><label for="studentName">الاسم</label><input id="studentName" type="text" autocomplete="name"></div>
+<div class="field"><label for="studentWhatsapp">رقم الواتساب</label><input id="studentWhatsapp" type="tel" autocomplete="tel"></div>
+<div class="field"><label for="studentGrade">الصف الدراسي <span class="optional">اختياري</span></label><input id="studentGrade" type="text"></div>
+<div class="field"><label for="studentCountry">الدولة <span class="optional">اختياري</span></label><input id="studentCountry" type="text"></div>
+</div>
+<div id="teacherFields" style="display:none">
+<div class="field"><label for="teacherName">الاسم</label><input id="teacherName" type="text" autocomplete="name"></div>
+<div class="field"><label for="teacherSubject">المادة</label><input id="teacherSubject" type="text"></div>
+<div class="field"><label for="teacherWhatsapp">رقم الواتساب</label><input id="teacherWhatsapp" type="tel" autocomplete="tel"></div>
+</div>
+<button id="submit" type="submit">تسجيل</button>
+<div id="loading" class="loading">جاري التسجيل...</div>
+</form>
+</div>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbw8X3k6wRj9B9vWFlKKvqC17655YaIVrwLre8ahbwhWVkOqOVuwx0BpEHY9RCoWev5m_w/exec";
+const type=document.getElementById("type"),studentFields=document.getElementById("studentFields"),teacherFields=document.getElementById("teacherFields"),form=document.getElementById("form"),submit=document.getElementById("submit"),loading=document.getElementById("loading"),message=document.getElementById("message");
+type.addEventListener("change",function(){const isStudent=this.value==="طالب";studentFields.style.display=isStudent?"block":"none";teacherFields.style.display=isStudent?"none":"block";clearMessage()});
+form.addEventListener("submit",function(e){e.preventDefault();if(submit.disabled)return;clearMessage();const requestId=crypto.randomUUID(),data={action:"register",type:type.value,requestId:requestId,callback:"registrationCallback"};if(type.value==="طالب"){data.name=document.getElementById("studentName").value;data.whatsapp=document.getElementById("studentWhatsapp").value;data.grade=document.getElementById("studentGrade").value;data.country=document.getElementById("studentCountry").value}else{data.name=document.getElementById("teacherName").value;data.subject=document.getElementById("teacherSubject").value;data.whatsapp=document.getElementById("teacherWhatsapp").value}setLoading(true);sendRequest(data)});
+function sendRequest(data){const old=document.getElementById("apiRequest");if(old)old.remove();const script=document.createElement("script"),params=new URLSearchParams(data);script.id="apiRequest";script.src=API_URL+"?"+params.toString();script.onerror=function(){removeRequest();setLoading(false);showMessage("تعذر الاتصال بالخادم","error")};document.body.appendChild(script);setTimeout(function(){if(document.getElementById("apiRequest")&&submit.disabled){removeRequest();setLoading(false);showMessage("انتهت مهلة الاتصال بالخادم","error")}},20000)}
+function registrationCallback(response){removeRequest();setLoading(false);if(!response||response.success!==true){showMessage(response&&response.message?response.message:"حدث خطأ من الخادم","error");return}if(!response.data||!response.data.row){showMessage("الخادم لم يؤكد تسجيل البيانات","error");return}showMessage(response.message,"success");form.reset();type.value="طالب";studentFields.style.display="block";teacherFields.style.display="none"}
+function removeRequest(){const script=document.getElementById("apiRequest");if(script)script.remove()}
+function setLoading(value){submit.disabled=value;loading.style.display=value?"block":"none"}
+function showMessage(text,type){message.textContent=text;message.className="message show "+type}
+function clearMessage(){message.textContent="";message.className="message"}
+</script>
+</body>
+</html>
