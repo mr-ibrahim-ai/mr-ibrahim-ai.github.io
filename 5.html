@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تعديل الاشتراكات</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb;color:#172033;font-family:Tahoma,Arial,sans-serif}
+.container{width:min(850px,94%);margin:22px auto}
+.header{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;padding:28px 23px;border-radius:25px;margin-bottom:18px}
+.header h1{margin:0 0 8px;font-size:24px}.header p{margin:0;font-size:13px;opacity:.85}
+.card{background:#fff;border:1px solid #e6eaf0;border-radius:22px;padding:20px;margin-bottom:18px;box-shadow:0 8px 25px #1720330b}
+label{display:block;font-size:14px;font-weight:700;margin-bottom:9px}
+select,input{width:100%;height:48px;border:1px solid #dce2ea;border-radius:13px;padding:0 13px;background:#fff;font-size:14px;outline:0}
+select:focus,input:focus{border-color:#2563eb}
+.hidden{display:none!important}
+.sub{border:1px solid #e2e7ef;border-radius:18px;padding:17px;margin-top:10px;cursor:pointer;background:#fafbfe}
+.sub strong{font-size:15px}.sub small{display:block;color:#737d8d;margin-top:6px}
+.form{margin-top:15px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{margin-top:12px}
+.btn{width:100%;height:49px;border:0;border-radius:13px;font-weight:700;cursor:pointer;margin-top:12px}
+.save{background:#2563eb;color:#fff}.delete{background:#fee2e2;color:#dc2626}.save:disabled,.delete:disabled{background:#94a3b8;color:#e2e8f0}
+.loading,.empty{text-align:center;padding:25px;color:#7b8494}
+.toast{position:fixed;bottom:20px;right:50%;transform:translateX(50%);background:#172033;color:#fff;padding:13px 20px;border-radius:13px;z-index:60}
+.success{background:#15803d}.error{background:#dc2626}
+.confirmBanner{position:fixed;inset:0;background:#0f172a99;display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.confirmBox{width:min(430px,100%);background:#fff;border-radius:24px;padding:24px;box-shadow:0 25px 70px #0003;text-align:center}
+.confirmIcon{width:54px;height:54px;border-radius:50%;background:#fff1f2;color:#dc2626;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:25px;font-weight:700}
+.confirmTitle{font-size:18px;font-weight:700;margin-bottom:9px}
+.confirmText{font-size:13px;color:#667085;line-height:1.8;margin-bottom:19px}
+.confirmActions{display:flex;gap:9px}
+.confirmBtn{height:46px;border:0;border-radius:12px;font-weight:700;cursor:pointer;flex:1}
+.confirmCancel{background:#f1f5f9;color:#334155}
+.confirmDelete{background:#dc2626;color:#fff}
+.confirmDelete:hover{background:#b91c1c}
+.confirmDelete:disabled{background:#94a3b8;color:#e2e8f0;cursor:not-allowed}
+@media(max-width:600px){.row{grid-template-columns:1fr}.container{margin:15px auto}}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>تعديل الاشتراكات</h1>
+<p>اختر الطالب ثم الاشتراك المطلوب</p>
+</div>
+<div class="card">
+<label>الطالب</label>
+<select id="students">
+<option>جاري التحميل...</option>
+</select>
+</div>
+<div id="subsCard" class="card hidden">
+<label>اشتراكات الطالب</label>
+<div id="subs"></div>
+</div>
+</div>
+<div id="confirmBanner" class="confirmBanner hidden">
+<div class="confirmBox">
+<div class="confirmIcon">!</div>
+<div class="confirmTitle">حذف الاشتراك</div>
+<div class="confirmText">سيتم حذف بيانات هذا الاشتراك والمواعيد المرتبطة به من الطالب والمعلم.<br>لا يمكن التراجع عن هذه العملية.</div>
+<div class="confirmActions">
+<button class="confirmBtn confirmCancel" onclick="closeDeleteBanner()">إلغاء</button>
+<button class="confirmBtn confirmDelete" onclick="confirmDelete()">تأكيد الحذف</button>
+</div>
+</div>
+</div>
+<div id="toast" class="toast hidden"></div>
+<script>
+const SCRIPT_URL='https://script.google.com/macros/s/AKfycbz8PwUjYwlpZjXaQ6JNKaPOQ_0ugde6UGHESM7EDnUumdmToVjrUcwid09ZVfO7qULC/exec';
+let students=[],selected=null,subscriptions=[],locked=false,deleteIndex=null;
+const studentsEl=document.getElementById('students'),subs=document.getElementById('subs'),subsCard=document.getElementById('subsCard');
+async function api(data){const r=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});return r.json()}
+document.addEventListener('DOMContentLoaded',loadStudents);
+async function loadStudents(){try{const r=await api({action:'getStudents'});if(!r.success)throw Error(r.error);students=r.students||[];studentsEl.innerHTML='<option value="">اختر الطالب</option>'+students.map((s,i)=>`<option value="${i}">${esc(s.name)} (${esc(s.code)})</option>`).join('')}catch(e){studentsEl.innerHTML='<option value="">تعذر تحميل الطلاب</option>';show(e.message,'error')}}
+studentsEl.onchange=async()=>{if(!studentsEl.value){selected=null;subscriptions=[];subsCard.classList.add('hidden');return}selected=students[Number(studentsEl.value)];subsCard.classList.remove('hidden');subs.innerHTML='<div class="loading">جاري تحميل الاشتراكات...</div>';try{const r=await api({action:'getSubscriptions',row:selected.row});if(!r.success)throw Error(r.error);subscriptions=r.subscriptions||[];renderSubs()}catch(e){subs.innerHTML='<div class="empty">تعذر تحميل الاشتراكات</div>';show(e.message,'error')}};
+function renderSubs(){if(!subscriptions.length){subs.innerHTML='<div class="empty">لا توجد اشتراكات</div>';return}subs.innerHTML=subscriptions.map((s,i)=>`<div class="sub" onclick="openSub(${i})"><strong>${esc(s.teacherName)}</strong><small>${esc(s.subject)} • اشتراك ${s.number}</small></div>`).join('')}
+function openSub(i){if(locked)return;const s=subscriptions[i];subs.innerHTML=`<div class="form"><div class="row"><div><label>اسم المعلم</label><input value="${esc(s.teacherName)}" disabled></div><div><label>كود المعلم</label><input value="${esc(s.teacherCode)}" disabled></div></div><div class="row full"><div><label>رقم واتساب المعلم</label><input value="${esc(s.teacherWhatsapp)}" disabled></div><div><label>المادة</label><input value="${esc(s.subject)}" disabled></div></div><div class="row full"><div><label>سعر اشتراك المعلم</label><input id="teacherPrice" value="${esc(s.teacherPrice)}"></div><div><label>عدد الحصص</label><input id="lessons" value="${esc(s.lessons)}"></div></div><div class="full"><label>سعر اشتراك الطالب</label><input id="studentPrice" value="${esc(s.studentPrice)}"></div><button class="btn save" id="save" onclick="saveSub(${i})">إرسال التعديلات</button><button class="btn delete" id="del" onclick="deleteSub(${i})">حذف الاشتراك بالكامل</button></div>`}
+async function saveSub(i){if(locked)return;const s=subscriptions[i],b=document.getElementById('save');b.disabled=true;b.textContent='جاري الحفظ...';try{const r=await api({action:'updateSubscription',row:selected.row,subscriptionNumber:s.number,raw:s.raw,teacherName:s.teacherName,teacherCode:s.teacherCode,subject:s.subject,teacherPrice:document.getElementById('teacherPrice').value,lessons:document.getElementById('lessons').value,studentPrice:document.getElementById('studentPrice').value});if(!r.success)throw Error(r.error);locked=true;b.textContent='تم حفظ التعديلات';document.querySelectorAll('button,select,input').forEach(x=>x.disabled=true);show('تم تعديل الاشتراك بنجاح','success')}catch(e){b.disabled=false;b.textContent='إرسال التعديلات';show(e.message,'error')}}
+function deleteSub(i){if(locked)return;deleteIndex=i;document.getElementById('confirmBanner').classList.remove('hidden')}
+function closeDeleteBanner(){deleteIndex=null;document.getElementById('confirmBanner').classList.add('hidden')}
+async function confirmDelete(){if(locked||deleteIndex===null)return;const i=deleteIndex,s=subscriptions[i],b=document.querySelector('.confirmDelete');b.disabled=true;b.textContent='جاري التحقق والحذف...';try{const r=await api({action:'deleteSubscription',row:selected.row,subscriptionNumber:s.number,raw:s.raw,studentName:selected.name,studentCode:selected.code,teacherName:s.teacherName,teacherCode:s.teacherCode,subject:s.subject});if(!r.success)throw Error(r.error);locked=true;document.getElementById('confirmBanner').classList.add('hidden');deleteIndex=null;const del=document.getElementById('del');if(del){del.disabled=true;del.textContent='تم حذف الاشتراك'}document.querySelectorAll('button,select,input').forEach(x=>x.disabled=true);show('تم حذف الاشتراك والمواعيد بنجاح','success')}catch(e){b.disabled=false;b.textContent='تأكيد الحذف';closeDeleteBanner();show(e.message,'error')}}
+function show(t,c){const x=document.getElementById('toast');x.textContent=t;x.className='toast '+c;x.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>x.classList.add('hidden'),3500)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+</script>
+</body>
+</html>
